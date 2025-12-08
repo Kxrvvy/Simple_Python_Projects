@@ -1,0 +1,96 @@
+'''
+re-creating the file organizer
+
+needed functions:
+
+get_file_category
+get_unique_filename
+organize_folders
+main
+'''
+
+import os 
+import shutil
+
+FILE_CATEGORIES = {
+    'Images' : ['.png', '.jpg', '.gif', '.svg'],
+    'Videos' : ['.mp4', '.mov', '.avi', '.mpg', '.mpeg'],
+    'Documents' : ['.pdf', '.txt', '.docx', '.doc', '.xlsx']
+}
+
+
+def get_file_category(extension):
+    extension = extension.lower()
+    
+    for name, file_extension in FILE_CATEGORIES.items():
+        if extension in file_extension:
+            return name
+    return 'Others'
+
+
+def get_unique_filename(destination_folder, filename):
+    
+    full_path = os.path.join(destination_folder, filename)
+    
+    if not os.path.exists(full_path):
+        return full_path
+    
+    name, file_extension = os.path.splitext(filename)
+    
+    counter = 1
+    
+    while True:
+        new_filename = name + "(" + counter + ")" + file_extension
+        new_path = os.path.join(destination_folder, new_filename)
+        
+        if not os.path.exists(new_path):
+            return new_path
+        
+        counter += 1
+        
+def organize_folders(file_path):
+    
+    category_count = {}
+    
+    items = os.listdir(file_path)
+    
+    for item in items:
+        
+        item_path = os.path.join(file_path, item)
+        
+        if not os.path.isfile(item_path):
+            continue
+        
+        name, file_extension = os.path.splitext(item)
+        
+        category = get_file_category(file_extension)
+        
+        category_folder = os.path.join(file_path, category)
+        
+        if not os.path.exists(category_folder):
+            os.makedirs(category_folder)
+            
+            
+        destination = get_unique_filename(category_folder, item)
+        
+        shutil.move(item_path, destination)
+        
+        if category not in category_count:
+            category_count[category] = 0
+        category_count[category] += 1
+        
+        print(f"Moved: {item} -> {destination}")
+        
+    print("\n" + "=" * 40)
+    print("Organization Complete")
+    print("=" * 40)
+    
+    total = sum(category_count.values())
+    print("Total Files moved: {total} ")
+    
+    for name, values in enumerate(category_count.items()):
+        print(f" - {name}: {values} files")
+    
+    
+        
+    
